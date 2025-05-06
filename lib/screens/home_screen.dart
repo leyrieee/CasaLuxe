@@ -7,12 +7,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../screens/chat_screen.dart';
-import '../app_config.dart';
 import '../screens/booking_form_screen.dart';
+import '../app_config.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -24,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showMap = false;
   final Map<MarkerId, Marker> _markers = {};
   final TextEditingController _searchController = TextEditingController();
-
   final List<String> categories = [
     'Plumber',
     'Electrician',
@@ -32,186 +30,57 @@ class _HomeScreenState extends State<HomeScreen> {
     'Laundry',
     'Handyman'
   ];
-
-  final List<Map<String, dynamic>> allArtisans = [
-    {
-      "name": "AquaFix Services",
-      "category": "Handyman",
-      "rating": 4.6,
-      "distance": 1.0
-    },
-    {
-      "name": "VoltPro Electric",
-      "category": "Electrician",
-      "rating": 4.1,
-      "distance": 0.4
-    },
-    {
-      "name": "SparkleClean Co.",
-      "category": "Cleaner",
-      "rating": 5.0,
-      "distance": 0.6
-    },
-    {
-      "name": "FreshPress Laundry",
-      "category": "Laundry",
-      "rating": 3.9,
-      "distance": 1.0
-    },
-    {
-      "name": "FixIt Hub",
-      "category": "Handyman",
-      "rating": 4.2,
-      "distance": 1.5
-    },
-    {
-      "name": "PipeMasters",
-      "category": "Plumber",
-      "rating": 4.2,
-      "distance": 2.9
-    },
-    {
-      "name": "WiredRight Solutions",
-      "category": "Electrician",
-      "rating": 4.6,
-      "distance": 2.5
-    },
-    {
-      "name": "EcoClean Express",
-      "category": "Cleaner",
-      "rating": 4.4,
-      "distance": 2.7
-    },
-    {
-      "name": "UrbanWash",
-      "category": "Laundry",
-      "rating": 4.8,
-      "distance": 2.6
-    },
-    {
-      "name": "QuickFix Crew",
-      "category": "Handyman",
-      "rating": 5.0,
-      "distance": 1.6
-    },
-    {"name": "LeakAway", "category": "Plumber", "rating": 4.5, "distance": 2.7},
-    {
-      "name": "BrightCurrent",
-      "category": "Electrician",
-      "rating": 4.2,
-      "distance": 1.9
-    },
-    {
-      "name": "NeatNest Cleaners",
-      "category": "Cleaner",
-      "rating": 4.5,
-      "distance": 2.9
-    },
-    {
-      "name": "WashPro Laundry",
-      "category": "Laundry",
-      "rating": 4.4,
-      "distance": 2.8
-    },
-    {
-      "name": "Reliable Repairs",
-      "category": "Handyman",
-      "rating": 4.0,
-      "distance": 1.9
-    },
-    {
-      "name": "BlueTap Plumbing",
-      "category": "Plumber",
-      "rating": 4.2,
-      "distance": 2.2
-    },
-    {
-      "name": "PowerNode Electricians",
-      "category": "Electrician",
-      "rating": 4.6,
-      "distance": 2.4
-    },
-    {
-      "name": "ShinySpaces",
-      "category": "Cleaner",
-      "rating": 4.4,
-      "distance": 2.9
-    },
-    {
-      "name": "LaundryLux",
-      "category": "Laundry",
-      "rating": 3.8,
-      "distance": 1.7
-    },
-    {
-      "name": "HandyGuys Inc.",
-      "category": "Handyman",
-      "rating": 4.1,
-      "distance": 2.1
-    },
-    {
-      "name": "DrainWizards",
-      "category": "Plumber",
-      "rating": 4.5,
-      "distance": 1.8
-    },
-    {
-      "name": "CircuitSquad",
-      "category": "Electrician",
-      "rating": 4.0,
-      "distance": 2.4
-    },
-    {
-      "name": "Spick&Span",
-      "category": "Cleaner",
-      "rating": 3.8,
-      "distance": 1.8
-    },
-    {
-      "name": "SpeedyWash",
-      "category": "Laundry",
-      "rating": 4.4,
-      "distance": 1.7
-    },
-    {
-      "name": "MasterHand Repairs",
-      "category": "Handyman",
-      "rating": 3.8,
-      "distance": 1.8
-    },
-    {
-      "name": "FlowLine Plumbers",
-      "category": "Plumber",
-      "rating": 3.6,
-      "distance": 2.8
-    },
-    {
-      "name": "AmpedUp Electrics",
-      "category": "Electrician",
-      "rating": 4.3,
-      "distance": 2.3
-    },
-    {
-      "name": "GlowUp Cleaners",
-      "category": "Cleaner",
-      "rating": 4.9,
-      "distance": 2.1
-    },
-    {
-      "name": "EcoBubble Laundry",
-      "category": "Laundry",
-      "rating": 3.7,
-      "distance": 2.7
-    },
-    {
-      "name": "HandyHome Pros",
-      "category": "Handyman",
-      "rating": 4.2,
-      "distance": 2.9
-    }
-  ];
-
   List<Map<String, dynamic>> _displayedArtisans = [];
+
+  final List<Map<String, dynamic>> allArtisans = List.generate(30, (index) {
+    final names = [
+      'AquaFix Services',
+      'VoltPro Electric',
+      'SparkleClean Co.',
+      'FreshPress Laundry',
+      'FixIt Hub',
+      'PipeMasters',
+      'WiredRight Solutions',
+      'EcoClean Express',
+      'UrbanWash',
+      'QuickFix Crew',
+      'LeakAway',
+      'BrightCurrent',
+      'NeatNest Cleaners',
+      'WashPro Laundry',
+      'Reliable Repairs',
+      'BlueTap Plumbing',
+      'PowerNode Electricians',
+      'ShinySpaces',
+      'LaundryLux',
+      'HandyGuys Inc.',
+      'DrainWizards',
+      'CircuitSquad',
+      'Spick&Span',
+      'SpeedyWash',
+      'MasterHand Repairs',
+      'FlowLine Plumbers',
+      'AmpedUp Electrics',
+      'GlowUp Cleaners',
+      'EcoBubble Laundry',
+      'HandyHome Pros',
+    ];
+    final categories = [
+      'Plumber',
+      'Electrician',
+      'Cleaner',
+      'Laundry',
+      'Handyman'
+    ];
+    final random = Random();
+    return {
+      'name': names[index],
+      'category': categories[index % categories.length],
+      'distance':
+          (random.nextDouble() * 10 + 0.5).toStringAsFixed(1), // 0.5km–10.5km
+      'rating': (4 + random.nextDouble()).toStringAsFixed(1), // 4.0–5.0
+    };
+  });
 
   @override
   void initState() {
@@ -225,28 +94,24 @@ class _HomeScreenState extends State<HomeScreen> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-
     if (permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always) {
       final position = await Geolocator.getCurrentPosition();
       setState(() {
         _currentPosition = LatLng(position.latitude, position.longitude);
-        _generateMarkers();
+        _generateMockMarkers();
       });
     }
   }
 
-  void _generateMarkers() {
-    final random = Random();
+  void _generateMockMarkers() {
     _markers.clear();
+    final random = Random();
     for (int i = 0; i < _displayedArtisans.length; i++) {
       final offsetLat = (random.nextDouble() - 0.5) / 300;
       final offsetLng = (random.nextDouble() - 0.5) / 300;
-      final position = LatLng(
-        _currentPosition.latitude + offsetLat,
-        _currentPosition.longitude + offsetLng,
-      );
-
+      final position = LatLng(_currentPosition.latitude + offsetLat,
+          _currentPosition.longitude + offsetLng);
       final artisan = _displayedArtisans[i];
       final markerId = MarkerId('artisan_$i');
       _markers[markerId] = Marker(
@@ -255,11 +120,13 @@ class _HomeScreenState extends State<HomeScreen> {
         infoWindow: InfoWindow(
           title: artisan['name'],
           snippet: 'Tap to chat or book',
-          onTap: () => _showArtisanBottomSheet(artisan),
+          onTap: () =>
+              _showArtisanBottomSheet(artisan['name'], artisan['category']),
         ),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
       );
     }
+    setState(() {});
   }
 
   void _filterArtisans(String query) {
@@ -272,32 +139,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _displayedArtisans = filtered;
-      _generateMarkers();
+      _generateMockMarkers();
     });
   }
 
-  void _showArtisanBottomSheet(Map<String, dynamic> artisan) {
+  Future<void> _startChatWithArtisan(String name) async {
+    final client = StreamChat.of(context).client;
+    final user = client.state.currentUser;
+    if (user == null) return;
+
+    final channel = client.channel(
+      'messaging',
+      id: '${user.id}_${name.replaceAll(' ', '').toLowerCase()}',
+      extraData: {
+        'members': [user.id, 'admin'],
+        'name': 'Chat with $name'
+      },
+    );
+    await channel.watch();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(channelId: channel.id!, artisanName: name),
+      ),
+    );
+  }
+
+  void _showArtisanBottomSheet(String name, String category) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(artisan['name'],
+            Text(name,
                 style: GoogleFonts.playfairDisplay(
                     fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            Text('Professional ${artisan['category']} service',
+            Text('Professional $category service',
                 style: GoogleFonts.poppins(fontSize: 14)),
-            const SizedBox(height: 10),
-            Text('★ ${artisan['rating']} · ${artisan['distance']} km away',
-                style:
-                    GoogleFonts.poppins(fontSize: 13, color: Colors.grey[700])),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -305,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
-                    _startChatWithArtisan(artisan['name']);
+                    _startChatWithArtisan(name);
                   },
                   icon: const Icon(Icons.chat),
                   label: const Text('Chat'),
@@ -316,9 +201,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => BookingFormScreen(
-                          artisanCategory: artisan['category'],
-                        ),
+                        builder: (_) =>
+                            BookingFormScreen(artisanCategory: category),
                       ),
                     );
                   },
@@ -333,26 +217,43 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _startChatWithArtisan(String name) async {
-    final client = StreamChat.of(context).client;
-    final user = client.state.currentUser;
-    if (user == null) return;
+  Widget _buildQuickTile(String label) {
+    final icons = {
+      'Plumber': Icons.plumbing,
+      'Electrician': Icons.electrical_services,
+      'Cleaner': Icons.cleaning_services,
+      'Laundry': Icons.local_laundry_service,
+      'Handyman': Icons.handyman,
+    };
 
-    final channel = client.channel(
-      'messaging',
-      id: '${user.id}${name.replaceAll(' ', '').toLowerCase()}',
-      extraData: {
-        'members': [user.id, 'admin'],
-        'name': 'Chat with $name',
-      },
-    );
-
-    await channel.watch();
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChatScreen(channelId: channel.id!, artisanName: name),
+    return GestureDetector(
+      onTap: () => _showArtisanBottomSheet('Top $label Service', label),
+      child: Container(
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.all(12),
+        width: 100,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2))
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icons[label] ?? Icons.person,
+                size: 30, color: AppColors.primary),
+            const SizedBox(height: 10),
+            Text(label,
+                style: GoogleFonts.poppins(
+                    fontSize: 13, fontWeight: FontWeight.w500),
+                textAlign: TextAlign.center),
+          ],
+        ),
       ),
     );
   }
@@ -366,10 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_showMap)
             Positioned.fill(
               child: GoogleMap(
-                initialCameraPosition: CameraPosition(
-                  target: _currentPosition,
-                  zoom: 15,
-                ),
+                initialCameraPosition:
+                    CameraPosition(target: _currentPosition, zoom: 15),
                 onMapCreated: (controller) => _mapController = controller,
                 myLocationEnabled: true,
                 myLocationButtonEnabled: true,
@@ -377,8 +276,19 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+              margin: _showMap
+                  ? const EdgeInsets.only(top: 250)
+                  : const EdgeInsets.only(top: 0),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: _showMap
+                    ? const BorderRadius.vertical(top: Radius.circular(20))
+                    : null,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -387,16 +297,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text('Find trusted help nearby',
                           style: GoogleFonts.playfairDisplay(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary)),
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          )),
                       IconButton(
                         icon: Icon(_showMap ? Icons.close : Icons.map),
                         onPressed: () => setState(() => _showMap = !_showMap),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: _searchController,
                     onChanged: _filterArtisans,
@@ -414,76 +325,39 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
-                    height: 120,
+                    height: 110,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children:
                           categories.map((c) => _buildQuickTile(c)).toList(),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  ..._displayedArtisans.map((artisan) => Card(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        child: ListTile(
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _displayedArtisans.length,
+                      itemBuilder: (context, index) {
+                        final artisan = _displayedArtisans[index];
+                        return ListTile(
                           title: Text(artisan['name'],
                               style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w600)),
                           subtitle: Text(
-                              '${artisan['category']} • ★${artisan['rating']} • ${artisan['distance']}km',
-                              style: GoogleFonts.poppins(fontSize: 12)),
-                          trailing:
-                              const Icon(Icons.arrow_forward_ios, size: 16),
-                          onTap: () => _showArtisanBottomSheet(artisan),
-                        ),
-                      )),
+                              '${artisan['category']} • ${artisan['distance']} km • ⭐ ${artisan['rating']}',
+                              style: GoogleFonts.poppins(fontSize: 13)),
+                          trailing: Icon(Icons.chevron_right,
+                              color: AppColors.primary),
+                          onTap: () => _showArtisanBottomSheet(
+                              artisan['name'], artisan['category']),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
+          )
         ],
-      ),
-    );
-  }
-
-  Widget _buildQuickTile(String label) {
-    final icons = {
-      'Plumber': Icons.plumbing,
-      'Electrician': Icons.electrical_services,
-      'Cleaner': Icons.cleaning_services,
-      'Laundry': Icons.local_laundry_service,
-      'Handyman': Icons.handyman,
-    };
-
-    return GestureDetector(
-      onTap: () => _showArtisanBottomSheet(
-          {'name': 'Top $label Service', 'category': label}),
-      child: Container(
-        margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.all(12),
-        width: 100,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            )
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icons[label] ?? Icons.person,
-                size: 30, color: AppColors.primary),
-            const SizedBox(height: 10),
-            Text(label,
-                style: GoogleFonts.poppins(
-                    fontSize: 13, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center),
-          ],
-        ),
       ),
     );
   }
