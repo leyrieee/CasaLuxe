@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:casaluxe/screens/main_layout.dart';
+import 'package:casaluxe/services/chat_service.dart';
 import 'package:casaluxe/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -33,13 +34,20 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final uid = FirebaseAuth.instance.currentUser!.uid;
+      final currentUser = FirebaseAuth.instance.currentUser!;
+      final uid = currentUser.uid;
+
       await FirestoreService().createUserProfile(
         uid: uid,
         name: _nameController.text.trim(),
         phone: widget.phoneNumber,
         email: _emailController.text.trim(),
         signupMethod: widget.signupMethod,
+      );
+
+      await ChatService().connectUser(
+        userId: uid,
+        userName: _nameController.text.trim(),
       );
 
       Navigator.pushReplacement(

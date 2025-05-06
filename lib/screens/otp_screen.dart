@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import '../app_config.dart';
 import '../services/auth_service.dart';
+import '../services/chat_service.dart';
 import '../services/firestore_service.dart';
 import '../screens/profile_form_screen.dart';
 
@@ -119,6 +120,8 @@ class _OtpScreenState extends State<OtpScreen> {
             email: widget.googleEmail ?? '',
             signupMethod: 'google',
           );
+          await ChatService().connectUser(
+              userId: currentUser.uid, userName: widget.googleName);
         }
 
         Navigator.pushReplacement(
@@ -137,6 +140,8 @@ class _OtpScreenState extends State<OtpScreen> {
             await FirestoreService().userProfileExists(user.uid);
 
         if (profileExists) {
+          await ChatService()
+              .connectUser(userId: user.uid, userName: user.displayName);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const MainLayout()),

@@ -15,20 +15,28 @@ class ChatService {
 
   Future<void> connectUser({
     required String userId,
-    required String userName,
+    required String? userName,
   }) async {
-    final user = User(id: userId, name: userName);
+    final user = User(
+      id: userId,
+      name: userName ?? 'Anonymous',
+    );
     final token = client.devToken(userId);
     await client.connectUser(user, token.rawValue);
   }
 
   Future<Channel> createOrGetChannelWithArtisan(String artisanId) async {
+    final currentUserId = client.state.currentUser!.id;
+    final channelId = '${currentUserId}_$artisanId';
+
     final channel = client.channel(
       'messaging',
+      id: channelId,
       extraData: {
-        'members': [client.state.currentUser!.id, artisanId],
+        'members': [currentUserId, artisanId],
       },
     );
+
     await channel.watch();
     return channel;
   }

@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../screens/chat_screen.dart'; // Ensure this exists
 import '../app_config.dart';
+import '../screens/booking_form_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -138,9 +139,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.pop(context); // Close the bottom sheet
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Booking Artisan $category')),
+                    );
+
+                    // Then navigate
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            BookingFormScreen(artisanCategory: category),
+                      ),
                     );
                   },
                   icon: const Icon(Icons.calendar_today),

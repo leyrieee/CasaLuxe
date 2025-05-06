@@ -45,32 +45,4 @@ class ChatScreen extends StatelessWidget {
       ),
     );
   }
-
-  Widget _customMessageBuilder(
-    BuildContext context,
-    Message message,
-    int index,
-    List<Message> messages,
-  ) {
-    final isMyMessage =
-        message.user?.id == StreamChat.of(context).currentUser?.id;
-    return Align(
-      alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isMyMessage ? AppColors.primary : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          message.text ?? '',
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: isMyMessage ? Colors.white : Colors.black87,
-          ),
-        ),
-      ),
-    );
-  }
 }
