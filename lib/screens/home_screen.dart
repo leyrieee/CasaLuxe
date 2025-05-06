@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import '../screens/chat_screen.dart'; // Ensure this exists
+import '../screens/chat_screen.dart';
 import '../app_config.dart';
 import '../screens/booking_form_screen.dart';
 
@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   LatLng _currentPosition = const LatLng(5.6651, -0.1657); // Default: Accra
   bool _showMap = false;
   final Map<MarkerId, Marker> _markers = {};
+  final TextEditingController _searchController = TextEditingController();
   final List<String> categories = [
     'Plumber',
     'Electrician',
@@ -30,10 +31,45 @@ class _HomeScreenState extends State<HomeScreen> {
     'Laundry',
     'Handyman'
   ];
+  List<Map<String, String>> _displayedArtisans = [];
+
+  final List<Map<String, String>> allArtisans = [
+    {'name': 'AquaFix Services', 'category': 'Handyman'},
+    {'name': 'VoltPro Electric', 'category': 'Electrician'},
+    {'name': 'SparkleClean Co.', 'category': 'Cleaner'},
+    {'name': 'FreshPress Laundry', 'category': 'Laundry'},
+    {'name': 'FixIt Hub', 'category': 'Handyman'},
+    {'name': 'PipeMasters', 'category': 'Plumber'},
+    {'name': 'WiredRight Solutions', 'category': 'Electrician'},
+    {'name': 'EcoClean Express', 'category': 'Cleaner'},
+    {'name': 'UrbanWash', 'category': 'Laundry'},
+    {'name': 'QuickFix Crew', 'category': 'Handyman'},
+    {'name': 'LeakAway', 'category': 'Plumber'},
+    {'name': 'BrightCurrent', 'category': 'Electrician'},
+    {'name': 'NeatNest Cleaners', 'category': 'Cleaner'},
+    {'name': 'WashPro Laundry', 'category': 'Laundry'},
+    {'name': 'Reliable Repairs', 'category': 'Handyman'},
+    {'name': 'BlueTap Plumbing', 'category': 'Plumber'},
+    {'name': 'PowerNode Electricians', 'category': 'Electrician'},
+    {'name': 'ShinySpaces', 'category': 'Cleaner'},
+    {'name': 'LaundryLux', 'category': 'Laundry'},
+    {'name': 'HandyGuys Inc.', 'category': 'Handyman'},
+    {'name': 'DrainWizards', 'category': 'Plumber'},
+    {'name': 'CircuitSquad', 'category': 'Electrician'},
+    {'name': 'Spick&Span', 'category': 'Cleaner'},
+    {'name': 'SpeedyWash', 'category': 'Laundry'},
+    {'name': 'MasterHand Repairs', 'category': 'Handyman'},
+    {'name': 'FlowLine Plumbers', 'category': 'Plumber'},
+    {'name': 'AmpedUp Electrics', 'category': 'Electrician'},
+    {'name': 'GlowUp Cleaners', 'category': 'Cleaner'},
+    {'name': 'EcoBubble Laundry', 'category': 'Laundry'},
+    {'name': 'HandyHome Pros', 'category': 'Handyman'},
+  ];
 
   @override
   void initState() {
     super.initState();
+    _displayedArtisans = List.from(allArtisans);
     _determinePosition();
   }
 
@@ -48,29 +84,29 @@ class _HomeScreenState extends State<HomeScreen> {
       final position = await Geolocator.getCurrentPosition();
       setState(() {
         _currentPosition = LatLng(position.latitude, position.longitude);
-        _generateMockArtisans();
+        _generateMockMarkers();
       });
     }
   }
 
-  void _generateMockArtisans() {
+  void _generateMockMarkers() {
     final random = Random();
-    for (int i = 0; i < categories.length; i++) {
-      final offsetLat = (random.nextDouble() - 0.5) / 500;
-      final offsetLng = (random.nextDouble() - 0.5) / 500;
-      final artisanPosition = LatLng(
-        _currentPosition.latitude + offsetLat,
-        _currentPosition.longitude + offsetLng,
-      );
+    for (int i = 0; i < _displayedArtisans.length; i++) {
+      final offsetLat = (random.nextDouble() - 0.5) / 300;
+      final offsetLng = (random.nextDouble() - 0.5) / 300;
+      final position = LatLng(_currentPosition.latitude + offsetLat,
+          _currentPosition.longitude + offsetLng);
+      final artisan = _displayedArtisans[i];
+
       final markerId = MarkerId('artisan_$i');
-      final category = categories[i];
       _markers[markerId] = Marker(
         markerId: markerId,
-        position: artisanPosition,
+        position: position,
         infoWindow: InfoWindow(
-          title: 'Artisan $category',
+          title: artisan['name'],
           snippet: 'Tap to chat or book',
-          onTap: () => _showArtisanBottomSheet(category),
+          onTap: () =>
+              _showArtisanBottomSheet(artisan['name']!, artisan['category']!),
         ),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
       );
@@ -78,17 +114,32 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
-  Future<void> _startChatWithArtisan(String category) async {
+  void _filterArtisans(String query) {
+    final filtered = allArtisans.where((artisan) {
+      final name = artisan['name']!.toLowerCase();
+      final category = artisan['category']!.toLowerCase();
+      return name.contains(query.toLowerCase()) ||
+          category.contains(query.toLowerCase());
+    }).toList();
+
+    setState(() {
+      _displayedArtisans = filtered;
+      _markers.clear();
+      _generateMockMarkers();
+    });
+  }
+
+  Future<void> _startChatWithArtisan(String name) async {
     final client = StreamChat.of(context).client;
     final user = client.state.currentUser;
     if (user == null) return;
 
     final channel = client.channel(
       'messaging',
-      id: '${user.id}_${category.toLowerCase()}',
+      id: '${user.id}${name.replaceAll(' ', '').toLowerCase()}',
       extraData: {
         'members': [user.id, 'admin'],
-        'name': 'Chat with Artisan $category',
+        'name': 'Chat with $name',
       },
     );
 
@@ -97,33 +148,27 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ChatScreen(
-          channelId: channel.id!,
-          artisanName: 'Artisan $category',
-        ),
+        builder: (_) => ChatScreen(channelId: channel.id!, artisanName: name),
       ),
     );
   }
 
-  void _showArtisanBottomSheet(String category) {
+  void _showArtisanBottomSheet(String name, String category) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Artisan $category',
-              style: GoogleFonts.playfairDisplay(
-                  fontSize: 22, fontWeight: FontWeight.bold),
-            ),
+            Text(name,
+                style: GoogleFonts.playfairDisplay(
+                    fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            Text('Professional $category near you',
+            Text('Professional $category service',
                 style: GoogleFonts.poppins(fontSize: 14)),
             const SizedBox(height: 20),
             Row(
@@ -132,26 +177,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
-                    _startChatWithArtisan(category);
+                    _startChatWithArtisan(name);
                   },
                   icon: const Icon(Icons.chat),
                   label: const Text('Chat'),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.pop(context); // Close the bottom sheet
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Booking Artisan $category')),
-                    );
-
-                    // Then navigate
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            BookingFormScreen(artisanCategory: category),
-                      ),
+                          builder: (_) =>
+                              BookingFormScreen(artisanCategory: category)),
                     );
                   },
                   icon: const Icon(Icons.calendar_today),
@@ -174,10 +212,8 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_showMap)
             Positioned.fill(
               child: GoogleMap(
-                initialCameraPosition: CameraPosition(
-                  target: _currentPosition,
-                  zoom: 15,
-                ),
+                initialCameraPosition:
+                    CameraPosition(target: _currentPosition, zoom: 15),
                 onMapCreated: (controller) => _mapController = controller,
                 myLocationEnabled: true,
                 myLocationButtonEnabled: true,
@@ -190,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               margin: _showMap
-                  ? const EdgeInsets.only(top: 250)
+                  ? const EdgeInsets.only(top: 350)
                   : const EdgeInsets.only(top: 0),
               decoration: BoxDecoration(
                 color: const Color(0xFFF5F5F5),
@@ -205,14 +241,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Find trusted help nearby',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                      ),
+                      Text('Find trusted help nearby',
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          )),
                       IconButton(
                         icon: Icon(_showMap ? Icons.close : Icons.map),
                         onPressed: () => setState(() => _showMap = !_showMap),
@@ -221,11 +255,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 10),
                   TextField(
+                    controller: _searchController,
+                    onChanged: _filterArtisans,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      hintText:
-                          'Search for services... Plumber, Electrician...',
+                      hintText: 'Search for services or names...',
                       hintStyle: GoogleFonts.poppins(fontSize: 14),
                       prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
@@ -246,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -262,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
     };
 
     return GestureDetector(
-      onTap: () => _showArtisanBottomSheet(label),
+      onTap: () => _showArtisanBottomSheet('Top $label Service', label),
       child: Container(
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.all(12),
@@ -272,10 +307,9 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            )
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2))
           ],
         ),
         child: Column(
@@ -284,12 +318,10 @@ class _HomeScreenState extends State<HomeScreen> {
             Icon(icons[label] ?? Icons.person,
                 size: 30, color: AppColors.primary),
             const SizedBox(height: 10),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                  fontSize: 13, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-            ),
+            Text(label,
+                style: GoogleFonts.poppins(
+                    fontSize: 13, fontWeight: FontWeight.w500),
+                textAlign: TextAlign.center),
           ],
         ),
       ),
