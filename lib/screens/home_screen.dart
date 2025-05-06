@@ -1,5 +1,6 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -15,8 +16,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late GoogleMapController _mapController;
-  LatLng _currentPosition = const LatLng(5.6651, -0.1657); // Default Accra
+  LatLng _currentPosition = const LatLng(5.6651, -0.1657); // Default: Accra
   bool _showMap = false;
+  final Map<MarkerId, Marker> _markers = {};
+  final List<String> categories = [
+    'Plumber',
+    'Electrician',
+    'Cleaner',
+    'Laundry',
+    'Handyman'
+  ];
 
   @override
   void initState() {
@@ -35,8 +44,82 @@ class _HomeScreenState extends State<HomeScreen> {
       final position = await Geolocator.getCurrentPosition();
       setState(() {
         _currentPosition = LatLng(position.latitude, position.longitude);
+        _generateMockArtisans();
       });
     }
+  }
+
+  void _generateMockArtisans() {
+    final random = Random();
+    for (int i = 0; i < categories.length; i++) {
+      final offsetLat = (random.nextDouble() - 0.5) / 500; // ~0.001 offset
+      final offsetLng = (random.nextDouble() - 0.5) / 500;
+      final artisanPosition = LatLng(_currentPosition.latitude + offsetLat,
+          _currentPosition.longitude + offsetLng);
+      final markerId = MarkerId('artisan_$i');
+      final category = categories[i];
+      _markers[markerId] = Marker(
+        markerId: markerId,
+        position: artisanPosition,
+        infoWindow: InfoWindow(
+          title: 'Artisan $category',
+          snippet: 'Tap to chat or book',
+          onTap: () => _showArtisanBottomSheet(category),
+        ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+      );
+    }
+    setState(() {});
+  }
+
+  void _showArtisanBottomSheet(String category) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Artisan $category',
+              style: GoogleFonts.playfairDisplay(
+                  fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text('Professional $category near you',
+                style: GoogleFonts.poppins(fontSize: 14)),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('Opening chat with Artisan $category')));
+                  },
+                  icon: const Icon(Icons.chat),
+                  label: const Text('Chat'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Booking Artisan $category')));
+                  },
+                  icon: const Icon(Icons.calendar_today),
+                  label: const Text('Book'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -55,6 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onMapCreated: (controller) => _mapController = controller,
                 myLocationEnabled: true,
                 myLocationButtonEnabled: true,
+                markers: Set<Marker>.of(_markers.values),
               ),
             ),
           SafeArea(
@@ -112,13 +196,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 120,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      children: [
-                        _buildQuickTile('Plumber', Icons.plumbing),
-                        _buildQuickTile(
-                            'Electrician', Icons.electrical_services),
-                        _buildQuickTile('Carpenter', Icons.chair_alt),
-                        _buildQuickTile('Painter', Icons.format_paint),
-                      ],
+                      children:
+                          categories.map((c) => _buildQuickTile(c)).toList(),
                     ),
                   ),
                 ],
@@ -130,34 +209,46 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQuickTile(String label, IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(12),
-      width: 100,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          )
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 30, color: AppColors.primary),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            style:
-                GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
-            textAlign: TextAlign.center,
-          ),
-        ],
+  Widget _buildQuickTile(String label) {
+    final icons = {
+      'Plumber': Icons.plumbing,
+      'Electrician': Icons.electrical_services,
+      'Cleaner': Icons.cleaning_services,
+      'Laundry': Icons.local_laundry_service,
+      'Handyman': Icons.handyman,
+    };
+
+    return GestureDetector(
+      onTap: () => _showArtisanBottomSheet(label),
+      child: Container(
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.all(12),
+        width: 100,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            )
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icons[label] ?? Icons.person,
+                size: 30, color: AppColors.primary),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                  fontSize: 13, fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
