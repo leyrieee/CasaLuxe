@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "264027375087",
+    "project_id": "casaluxe-4b6ac",
+    "storage_bucket": "casaluxe-4b6ac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:264027375087:android:54f2e721c27de81a5ce21a",
+        "android_client_info": {
+          "package_name": "com.example.casaluxe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "264027375087-nikr8tivo9g4v68jp7c27ir0j80g7ikt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.casaluxe",
+            "certificate_hash": "4ff4a2a80e83d7d2ec97cda8c21dce63c31a940d"
+          }
+        },
+        {
+          "client_id": "264027375087-5nnpag19c2tvg9mpacv42croedtocnlf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsSVMDqtYUfGQjl3ukCBGSUZibxdlwJd8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "264027375087-5nnpag19c2tvg9mpacv42croedtocnlf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
