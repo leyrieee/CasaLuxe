@@ -29,18 +29,19 @@ class CasaLuxeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamChat(
-      client: chatClient,
-      child: MaterialApp(
-        title: 'Casa Luxe',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          fontFamily: 'Roboto',
-          scaffoldBackgroundColor: const Color(0xFFFAF9F6),
-        ),
-        initialRoute: '/',
-        routes: routes,
+    return MaterialApp(
+      title: 'Casa Luxe',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Roboto',
+        scaffoldBackgroundColor: const Color(0xFFFAF9F6),
       ),
+      builder: (context, child) => StreamChat(
+        client: chatClient,
+        child: child!,
+      ),
+      initialRoute: '/',
+      routes: routes,
     );
   }
 }

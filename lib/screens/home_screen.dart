@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import '../screens/chat_screen.dart'; // Ensure this exists
 import '../app_config.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // ignore: unused_field
   late GoogleMapController _mapController;
   LatLng _currentPosition = const LatLng(5.6651, -0.1657); // Default: Accra
   bool _showMap = false;
@@ -52,10 +55,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void _generateMockArtisans() {
     final random = Random();
     for (int i = 0; i < categories.length; i++) {
-      final offsetLat = (random.nextDouble() - 0.5) / 500; // ~0.001 offset
+      final offsetLat = (random.nextDouble() - 0.5) / 500;
       final offsetLng = (random.nextDouble() - 0.5) / 500;
-      final artisanPosition = LatLng(_currentPosition.latitude + offsetLat,
-          _currentPosition.longitude + offsetLng);
+      final artisanPosition = LatLng(
+        _currentPosition.latitude + offsetLat,
+        _currentPosition.longitude + offsetLng,
+      );
       final markerId = MarkerId('artisan_$i');
       final category = categories[i];
       _markers[markerId] = Marker(
@@ -70,6 +75,33 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     setState(() {});
+  }
+
+  Future<void> _startChatWithArtisan(String category) async {
+    final client = StreamChat.of(context).client;
+    final user = client.state.currentUser;
+    if (user == null) return;
+
+    final channel = client.channel(
+      'messaging',
+      id: '${user.id}_${category.toLowerCase()}',
+      extraData: {
+        'members': [user.id, 'admin'],
+        'name': 'Chat with Artisan $category',
+      },
+    );
+
+    await channel.watch();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(
+          channelId: channel.id!,
+          artisanName: 'Artisan $category',
+        ),
+      ),
+    );
   }
 
   void _showArtisanBottomSheet(String category) {
@@ -99,8 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Opening chat with Artisan $category')));
+                    _startChatWithArtisan(category);
                   },
                   icon: const Icon(Icons.chat),
                   label: const Text('Chat'),
@@ -109,7 +140,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Booking Artisan $category')));
+                      SnackBar(content: Text('Booking Artisan $category')),
+                    );
                   },
                   icon: const Icon(Icons.calendar_today),
                   label: const Text('Book'),
